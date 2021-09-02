@@ -1,0 +1,16 @@
+cudnn_enabled = True
+dampening = 0
+epoch_step = 80
+k_folds = 5
+k_folds_results = {}
+learning_rate = 0.1
+learning_rate_decay = 0
+learning_rate_decay_ratio = 0.2
+log_interval = 10
+momentum = 0.9
+n_batch = 128
+n_epochs = 200
+weight_decay = 0.0005
+widen_factor = 1
+random_seed = 1
+weight_decay = 0.0005
