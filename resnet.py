@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
 
+features = []
+
 
 def conv3x3(in_channels, out_channels, stride=1, groups=1, dilation=1):
     return nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=stride, padding=dilation, groups=groups,
@@ -170,13 +172,23 @@ class ResNet(nn.Module):
         return nn.Sequential(*layers)
 
     def _forward_impl(self, x):
+        features.clear()
+
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
         x = self.maxpool(x)
 
+        features.append(x)
+
         x = self.layer1(x)
+
+        features.append(x)
+
         x = self.layer2(x)
+
+        features.append(x)
+
         x = self.layer3(x)
         x = self.layer4(x)
 
