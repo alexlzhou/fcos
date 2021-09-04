@@ -41,3 +41,11 @@ class FPN(nn.Module):
 
         self.conv1 = nn.Conv2d(3, self.in_channels, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_channels)
+
+        self.layer1 = self._make_layer(block, 64, num_blocks[0], stride=1)
+
+    def _make_layer(self, block, channels, num_blocks, stride):
+
+    def _upsample_add(self, x, y):
+
+    def forward(self, x):

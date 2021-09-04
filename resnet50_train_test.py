@@ -141,6 +141,8 @@ if __name__ == '__main__':
                                                   pin_memory=True, sampler=test_subsampler)
 
         network = resnet.resnet50()
+        print(network)
+        quit()
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         network.to(device)

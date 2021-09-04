@@ -179,8 +179,6 @@ class ResNet(nn.Module):
         x = self.relu(x)
         x = self.maxpool(x)
 
-        features.append(x)
-
         x = self.layer1(x)
 
         features.append(x)
@@ -190,6 +188,9 @@ class ResNet(nn.Module):
         features.append(x)
 
         x = self.layer3(x)
+
+        features.append(x)
+
         x = self.layer4(x)
 
         x = self.avgpool(x)
@@ -200,6 +201,18 @@ class ResNet(nn.Module):
 
     def forward(self, x):
         return self._forward_impl(x)
+
+
+class FPN(nn.Module):
+    def __init__(self):
+        super(FPN, self).__init__()
+
+
+    def _make_layer(self):
+
+    def _forward_impl(self, x):
+
+    def forward(self, x):
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
