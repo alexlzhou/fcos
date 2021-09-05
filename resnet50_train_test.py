@@ -131,6 +131,10 @@ if __name__ == '__main__':
     kfold = KFold(n_splits=k_folds, shuffle=True)
     total_data = torch.utils.data.ConcatDataset([train_data, test_data])
 
+    network = resnet.resnet50()
+    # print(network)
+    # quit()
+
     for fold, (train_ids, test_ids) in enumerate(kfold.split(total_data)):
         train_subsampler = torch.utils.data.SubsetRandomSampler(train_ids)
         test_subsampler = torch.utils.data.SubsetRandomSampler(test_ids)
@@ -139,10 +143,6 @@ if __name__ == '__main__':
                                                    pin_memory=True, sampler=train_subsampler)
         test_loader = torch.utils.data.DataLoader(total_data, batch_size=n_batch, num_workers=2,
                                                   pin_memory=True, sampler=test_subsampler)
-
-        network = resnet.resnet50()
-        print(network)
-        quit()
 
         device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         network.to(device)
