@@ -293,9 +293,11 @@ class FPN(nn.Module):
     def _forward_impl(self, x):
         p5 = x
         # p5 to p4
-        p4 = F.upsample(p5, size=(features[1].shape[2], features[1].shape[3]), mode='bilinear') + features[1]
+        p4 = self._upsample_add(p5, features[1])
+        # p4 = F.upsample(p5, size=(features[1].shape[2], features[1].shape[3]), mode='bilinear') + features[1]
         # p4 to p3
-        p3 = F.upsample(p4, size=(features[0].shape[2], features[0].shape[3]), mode='bilinear') + features[0]
+        p3 = self._upsample_add(p4, features[0])
+        # p3 = F.upsample(p4, size=(features[0].shape[2], features[0].shape[3]), mode='bilinear') + features[0]
 
         # p5 to p6
         p6 = self.p5_p6(p5)
@@ -303,23 +305,7 @@ class FPN(nn.Module):
         p7 = self.p6_p7(p6)
 
     def forward(self, x):
-        # Bottom-up
-        c1 = F.relu(self.bn1(self.conv1(x)))
-        c1 = F.max_pool2d(c1, kernel_size=3, stride=2, padding=1)
-        c2 = self.layer1(c1)
-        c3 = self.layer2(c2)
-        c4 = self.layer3(c3)
-        c5 = self.layer4(c4)
-        # Top-down
-        p5 = self.toplayer(c5)
-        p4 = self._upsample_add(p5, self.latlayer1(c4))
-        p3 = self._upsample_add(p4, self.latlayer2(c3))
-        p2 = self._upsample_add(p3, self.latlayer3(c2))
-        # Smooth
-        p4 = self.smooth1(p4)
-        p3 = self.smooth2(p3)
-        p2 = self.smooth3(p2)
-        return p2, p3, p4, p5
+        return self._forward_impl(x)
 
 
 def _resnet(arch, block, layers, pretrained, progress, **kwargs):
