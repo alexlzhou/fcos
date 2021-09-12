@@ -101,6 +101,99 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        out3 = self.layer2(x)
+        out4 = self.layer3(out3)
+        out5 = self.layer4(out4)
+
+        if self.include_top:
+            x = self.avgpool(out5)
+            x = x.view(x.size(0), -1)
+            x = self.fc(x)
+            return x
+        else:
+            return (out3, out4, out5)
+
+    def freeze_bn(self):
+        for layer in self.modules():
+            if isinstance(layer, nn.BatchNorm2d):
+                layer.eval()
+
+    def freeze_stages(self, stage):
+        if stage >= 0:
+            self.bn1.eval()
+            for m in [self.conv1, self.bn1]:
+                for param in m.parameters():
+                    param.requires_grad = False
+        for i in range(1, stage + 1):
+            layer = getattr(self, 'layer{}'.format(i))
+
+
+class FPN(nn.Module):
+    def __init__(self, features=256, use_p5=True):
+        super(FPN, self).__init__()
+
+        self.prj_5 = nn.Conv2d(2048, features, kernel_size=1)
+        self.prj_4 = nn.Conv2d(1024, features, kernel_size=1)
+        self.prj_3 = nn.Conv2d(512, features, kernel_size=1)
+
+        self.conv_5 = nn.Conv2d(features, features, kernel_size=3, padding=1)
+        self.conv_4 = nn.Conv2d(features, features, kernel_size=3, padding=1)
+        self.conv_3 = nn.Conv2d(features, features, kernel_size=3, padding=1)
+
+        if use_p5:
+            self.conv_out6 = nn.Conv2d(features, features, kernel_size=3, padding=1, stride=2)
+        else:
+            self.conv_out6 = nn.Conv2d(2048, features, kernel_size=3, padding=1, stride=2)
+
+        self.conv_out7 = nn.Conv2d(features, features, kernel_size=3, padding=1, stride=2)
+
+        self.use_p5 = use_p5
+        self.apply(self.init_conv_kaiming)
+
+    def upsample(self, inputs):
+        src, target = inputs
+        return F.interpolate(src, size=(target.shape[2], target.shape[3]), mode='nearest')
+
+    def init_conv_kaiming(self, module):
+        if isinstance(module, nn.Conv2d):
+            nn.init.kaiming_uniform_(module.weight, a=1)
+
+            if module.bias is not None:
+                nn.init.constant_(module.bias, 0)
+
+    def forward(self, x):
+        C3, C4, C5 = x
+
+        P3 = self.prj_3(C3)
+        P4 = self.prj_4(C4)
+        P5 = self.prj_5(C5)
+
+        P4 = P4 + self.upsample([P5, P4])
+        P3 = P3 + self.upsample([P4, P3])
+
+        P3 = self.conv_3(P3)
+        P4 = self.conv_4(P4)
+        P5 = self.conv_5(P5)
+
+        P5 = P5 if self.use_p5 else C5
+        P6 = self.conv_out6(P5)
+        P7 = self.conv_out7(F.relu(P6))
+
+        return [P3, P4, P5, P6, P7]
+
+
+
+def resnet50(pretrained=False, **kwargs):
+    model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
+    return model
+
 
 class FCOS(nn.Module):
     def __init__(self):
