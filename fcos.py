@@ -171,9 +171,9 @@ class FPN(nn.Module):
     def forward(self, x):
         C3, C4, C5 = x
 
-        P3 = self.prj_3(C3)
-        P4 = self.prj_4(C4)
         P5 = self.prj_5(C5)
+        P4 = self.prj_4(C4)
+        P3 = self.prj_3(C3)
 
         P4 = P4 + self.upsample([P5, P4])
         P3 = P3 + self.upsample([P4, P3])
@@ -188,6 +188,34 @@ class FPN(nn.Module):
 
         return [P3, P4, P5, P6, P7]
 
+
+class ScaleExp(nn.Module):
+    def __init__(self, init_value=1.0):
+        super(ScaleExp, self).__init__()
+        self.scale = nn.Parameter(torch.tensor([init_value], dtype=torch.float32))
+
+    def forward(self, x):
+        return torch.exp(x * self.scale)
+
+
+class ClsCtrRegHead(nn.Module):
+    def __init(self, in_channel, class_num, GN=True, ctr_on_reg=True, prior=0.01):
+        super(ClsCtrRegHead, self).__init__()
+
+        self.prior = prior
+        self.class_num = class_num
+        self.ctr_on_reg = ctr_on_reg
+
+        cls_branch = []
+        reg_branch = []
+
+        for i in range(4):
+            cls_branch.append(nn.Conv2d(in_channel, in_channel, kernel_size=3, padding=1, bias=True))
+
+            if GN:
+                cls_branch.append(nn.GroupNorm(32, in_channel))
+
+            cls_branch.append(nn.ReLU(True))
 
 
 def resnet50(pretrained=False, **kwargs):
