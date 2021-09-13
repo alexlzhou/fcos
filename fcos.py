@@ -217,6 +217,13 @@ class ClsCtrRegHead(nn.Module):
 
             cls_branch.append(nn.ReLU(True))
 
+            reg_branch.append(nn.Conv2d(in_channel, in_channel, kernel_size=3, padding=1, bias=True))
+
+            if GN:
+                reg_branch.append(nn.GroupNorm(32, in_channel))
+
+            reg_branch.append(nn.ReLU(True))
+
 
 def resnet50(pretrained=False, **kwargs):
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
