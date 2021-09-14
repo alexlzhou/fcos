@@ -199,7 +199,7 @@ class ScaleExp(nn.Module):
 
 
 class ClsCtrRegHead(nn.Module):
-    def __init(self, in_channel, class_num, GN=True, ctr_on_reg=True, prior=0.01):
+    def __init__(self, in_channel, class_num, GN=True, ctr_on_reg=True, prior=0.01):
         super(ClsCtrRegHead, self).__init__()
 
         self.prior = prior
@@ -223,6 +223,44 @@ class ClsCtrRegHead(nn.Module):
                 reg_branch.append(nn.GroupNorm(32, in_channel))
 
             reg_branch.append(nn.ReLU(True))
+
+        self.cls_conv = nn.Sequential(*cls_branch)
+        self.reg_conv = nn.Sequential(*reg_branch)
+
+        self.cls_logits = nn.Conv2d(in_channel, class_num, kernel_size=3, padding=1)
+        self.ctr_logits = nn.Conv2d(in_channel, 1, kernel_size=3, padding=1)
+        self.reg_pred = nn.Conv2d(in_channel, 4, kernel_size=3, padding=1)
+
+        self.apply(self.init_conv_random_normal)
+
+        nn.init.constant_(self.cls_logits.bias, -math.log((1 - prior) / prior))
+        self.scale_exp = nn.ModuleList([ScaleExp(1.0) for _ in range(5)])
+
+    def init_conv_random_normal(self, module, std=0.01):
+        if isinstance(module, nn.Conv2d):
+            nn.init.normal_(module.weight, std=std)
+
+            if module.bias is not None:
+                nn.init.constant_(module.bias, 0)
+
+    def forward(self, inputs):
+        """inputs are p3 to p7"""
+        cls_logits = []
+        ctr_logits = []
+        reg_preds = []
+
+        for index, p in enumerate(inputs):
+            cls_conv_out = self.cls_conv(p)
+            reg_conv_out = self.reg_conv(p)
+
+            cls_logits.append(self.cls_logits(cls_conv_out))
+            if not self.ctr_on_reg:
+                ctr_logits.append(self.ctr_logits(cls_conv_out))
+            else:
+                ctr_logits.append(self.ctr_logits(reg_conv_out))
+            reg_preds.append(self.scale_exp[index](self.reg_pred(reg_conv_out)))
+
+        return cls_logits, ctr_logits, reg_preds
 
 
 def resnet50(pretrained=False, **kwargs):
