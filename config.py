@@ -1,8 +1,8 @@
 class DefaultConfig():
     # backbone
     pretrained = True
-    freeze_stage_1 = True
-    freeze_bn = True
+    freeze_stage_1 = False
+    freeze_bn = False
 
     # fpn
     fpn_out_channels = 256
@@ -13,7 +13,7 @@ class DefaultConfig():
     use_GN_head = True
     prior = 0.01
     add_centerness = True
-    cnt_on_reg = False
+    ctr_on_reg = False
 
     # training
     strides = [8, 16, 32, 64, 128]
