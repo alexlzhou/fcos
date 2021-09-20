@@ -3,22 +3,24 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from .config import DefaultConfig
-from .fpn import FPN
-from .head import ClsCtrRegHead
-from .loss import GenTargets, LOSS, fmap_to_og_coords
-from .resnet import resnet50
+from config import DefaultConfig
+from fpn import FPN
+from head import ClsCtrRegHead
+from loss import GenTargets, LOSS, fmap_to_og_coords
+from resnet import resnet50
 
 
 class FCOS(nn.Module):
     def __init__(self, config=None):
         super().__init__()
         if config is None:
-            config = DefaultConfig
-        self.backbone = resnet50(pretrained=config.pretrained, if_include_top=False)
-        self.fpn = FPN(config.fpn_out_channels, use_p5=config.use_p5)
-        self.head = ClsCtrRegHead(config.fpn_out_channels, config.class_num,
-                                  config.use_GN_head, config.ctr_on_reg, config.prior)
+            self.config = DefaultConfig
+        else:
+            self.config = config
+        self.backbone = resnet50(pretrained=self.config.pretrained, include_top=False)
+        self.fpn = FPN(self.config.fpn_out_channels, use_p5=self.config.use_p5)
+        self.head = ClsCtrRegHead(self.config.fpn_out_channels, self.config.class_num,
+                                  self.config.use_GN_head, self.config.ctr_on_reg, self.config.prior)
 
     def forward(self, x):
         '''

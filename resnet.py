@@ -47,6 +47,8 @@ class Bottleneck(nn.Module):
         out += residual
         out = self.relu(out)
 
+        return out
+
 
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=1000, include_top=False):

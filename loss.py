@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from .config import DefaultConfig
+from config import DefaultConfig
 
 
 def fmap_to_og_coords(feature, stride):
@@ -81,7 +81,7 @@ class GenTargets(nn.Module):
         class_num = cls_logits.shape[1]
         m = gt_boxes.shape[1]
 
-        cls_logits = cls_logits.premute(0, 2, 3, 1)  # [batch_size, h, w, class_num]
+        cls_logits = cls_logits.permute(0, 2, 3, 1)  # [batch_size, h, w, class_num]
         coords = fmap_to_og_coords(cls_logits, stride).to(device=gt_boxes.device)  # [h * w, 2]
         cls_logits = cls_logits.reshape((batch_size, -1, class_num))  # [batch_size, h * w, class_num]
 
@@ -126,8 +126,7 @@ class GenTargets(nn.Module):
 
         areas[~mask_pos] = 99999999
         areas_min_ind = torch.min(areas, dim=-1)[1]  # [batch_size, h * w]
-        reg_targets = ltrb_off[torch.zeros_like(areas, dtype=torch.bool).scatter_(-1, areas_min_ind.unsqueeze(dim=-1),
-                                                                                  1)]  # [batch_size * h * w, 4]
+        reg_targets = ltrb_off[torch.zeros_like(areas, dtype=torch.bool).scatter_(-1, areas_min_ind.unsqueeze(dim=-1), 1)]  # [batch_size * h * w, 4]
         reg_targets = torch.reshape(reg_targets, (batch_size, -1, 4))  # [batch_size, h * w, 4]
 
         classes = torch.broadcast_tensors(classes[:, None, :], areas.long())[0]  # [batch_size, h * w, m]
@@ -139,8 +138,7 @@ class GenTargets(nn.Module):
         left_right_max = torch.max(reg_targets[..., 0], reg_targets[..., 2])
         top_bottom_min = torch.min(reg_targets[..., 1], reg_targets[..., 3])
         top_bottom_max = torch.max(reg_targets[..., 1], reg_targets[..., 3])
-        ctr_targets = ((left_right_min * top_bottom_min) / (left_right_max * top_bottom_max + 1e-10)).sqrt().unsqueeze(
-            dim=-1)  # [batch_size, h * w, 1]
+        ctr_targets = ((left_right_min * top_bottom_min) / (left_right_max * top_bottom_max + 1e-10)).sqrt().unsqueeze(dim=-1)  # [batch_size, h * w, 1]
 
         assert reg_targets.shape == (batch_size, h_mul_w, 4)
         assert cls_targets.shape == (batch_size, h_mul_w, 1)
