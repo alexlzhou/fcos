@@ -127,11 +127,11 @@ def eval_ap_2d(gt_boxes, gt_labels, pred_boxes, pred_labels, pred_scores, iou_th
 
 if __name__ == "__main__":
     from fcos import FCOSDetector
-    from demo import convertSyncBNtoBN
+    # from demo import convertSyncBNtoBN
     from dataset_voc import VOCDataset
 
     eval_dataset = VOCDataset("D:/projects_python/_datasets/VOCdevkit/VOC2012", resize_size=[512, 800], split='val')
-    print("INFO===>eval dataset has %d imgs" % len(eval_dataset))
+    print("eval dataset has %d imgs" % len(eval_dataset))
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1, shuffle=False,
                                               collate_fn=eval_dataset.collate_fn)
 
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # model=convertSyncBNtoBN(model)
     # print("INFO===>success convert SyncBN to BN")
     model = model.cuda().eval()
-    print("===>success loading model")
+    print("model loaded successfully")
 
     gt_boxes = []
     gt_classes = []
@@ -168,9 +168,9 @@ if __name__ == "__main__":
     pred_boxes, pred_classes, pred_scores = sort_by_score(pred_boxes, pred_classes, pred_scores)
     all_AP = eval_ap_2d(gt_boxes, gt_classes, pred_boxes, pred_classes, pred_scores, 0.5,
                         len(eval_dataset.CLASSES_NAME) + 1)
-    print("all classes AP=====>\n", all_AP)
+    print("AP of each class: \n", all_AP)
     mAP = 0.
     for class_id, class_mAP in all_AP.items():
         mAP += float(class_mAP)
     mAP /= (len(eval_dataset.CLASSES_NAME) + 1)
-    print("mAP=====>%.3f\n" % mAP)
+    print("mAP: %.3f\n" % mAP)

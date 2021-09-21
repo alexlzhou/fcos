@@ -10,7 +10,7 @@ val_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resiz
 
 model = FCOSDetector(mode="training").cuda()
 # model.load_state_dict(torch.load("./checkpoints/voc_512x800_loss2.0635.pth"))
-optimizer = torch.optim.Adam(model.parameters(), lr=1e-4)
+optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 
 BATCH_SIZE = 1
 EPOCHS = 30
@@ -71,7 +71,7 @@ for epoch in range(EPOCHS):
                   lr))
 
         writer.add_scalar("loss/cls_loss", losses[0], global_step=GLOBAL_STEPS)
-        writer.add_scalar("loss/cnt_loss", losses[1], global_step=GLOBAL_STEPS)
+        writer.add_scalar("loss/ctr_loss", losses[1], global_step=GLOBAL_STEPS)
         writer.add_scalar("loss/reg_loss", losses[2], global_step=GLOBAL_STEPS)
         writer.add_scalar("lr", lr, global_step=GLOBAL_STEPS)
 
