@@ -5,7 +5,7 @@ import math, time
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-train_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resize_size=[512, 800], split='train')
+train_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resize_size=[512, 800], split='trainval')
 val_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resize_size=[512, 800], split='val')
 
 model = FCOSDetector(mode="training").cuda()

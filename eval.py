@@ -139,7 +139,7 @@ if __name__ == "__main__":
     # model=torch.nn.SyncBatchNorm.convert_sync_batchnorm(model)
     # print("INFO===>success convert BN to SyncBN")
     model.load_state_dict(
-        torch.load("./voc2012_512x800_epoch30_loss0.6150.pth", map_location=torch.device('cpu')))
+        torch.load("./voc2012_512x800_epoch19_loss0.6567.pth", map_location=torch.device('cpu')))
     # model=convertSyncBNtoBN(model)
     # print("INFO===>success convert SyncBN to BN")
     model = model.cuda().eval()
