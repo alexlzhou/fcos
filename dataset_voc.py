@@ -8,7 +8,7 @@ from torchvision import transforms
 
 class VOCDataset(torch.utils.data.Dataset):
     CLASSES_NAME = (
-        "__background__ ",
+        "__background__",
         "aeroplane",
         "bicycle",
         "bird",
