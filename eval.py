@@ -62,14 +62,14 @@ def _compute_ap(recall, precision):
     return ap
 
 
-def eval_ap_2d(gt_boxes, gt_labels, pred_boxes, pred_labels, pred_scores, iou_thread, num_cls):
+def eval_ap_2d(gt_boxes, gt_labels, pred_boxes, pred_labels, pred_scores, iou_threashold, num_cls):
     """
     :param gt_boxes: list of 2d array,shape[(a,(x1,y1,x2,y2)),(b,(x1,y1,x2,y2))...]
     :param gt_labels: list of 1d array,shape[(a),(b)...],value is sparse label index
     :param pred_boxes: list of 2d array, shape[(m,(x1,y1,x2,y2)),(n,(x1,y1,x2,y2))...]
     :param pred_labels: list of 1d array,shape[(m),(n)...],value is sparse label index
     :param pred_scores: list of 1d array,shape[(m),(n)...]
-    :param iou_thread: eg. 0.5
+    :param iou_threashold: eg. 0.5
     :param num_cls: eg. 4, total number of class including background which is equal to 0
     :return: a dict containing average precision for each cls
     """
@@ -102,7 +102,7 @@ def eval_ap_2d(gt_boxes, gt_labels, pred_boxes, pred_labels, pred_scores, iou_th
                 iou = iou_2d(sample_gts, pred_box)
                 gt_for_box = np.argmax(iou, axis=0)
                 max_overlap = iou[gt_for_box, 0]
-                if max_overlap >= iou_thread and gt_for_box not in assigned_gt:
+                if max_overlap >= iou_threashold and gt_for_box not in assigned_gt:
                     fp = np.append(fp, 0)
                     tp = np.append(tp, 1)
                     assigned_gt.append(gt_for_box)
@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # from demo import convertSyncBNtoBN
     from dataset_voc import VOCDataset
 
-    eval_dataset = VOCDataset("D:/projects_python/_datasets/VOCdevkit/VOC2012", resize_size=[512, 800], split='val')
+    eval_dataset = VOCDataset("D:/projects_python/_datasets/VOCdevkit_2012_test/VOC2012", resize_size=[512, 800], split='test')
     print("eval dataset has %d imgs" % len(eval_dataset))
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1, shuffle=False,
                                               collate_fn=eval_dataset.collate_fn)
