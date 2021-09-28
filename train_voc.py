@@ -1,5 +1,6 @@
 from torch.optim import Adam
 
+from demo import convertSyncBNtoBN
 from fcos import FCOSDetector
 from dataset_voc import VOCDataset
 
@@ -26,8 +27,8 @@ TOTAL_STEPS = steps_per_epoch * EPOCHS
 WARMPUP_STEPS = TOTAL_STEPS * WARMPUP_STEPS_RATIO
 
 GLOBAL_STEPS = 1
-LR_INIT = 5e-5
-LR_END = 1e-6
+LR_INIT = 0.001
+LR_END = 0.0001
 
 writer = SummaryWriter(log_dir="./logs")
 

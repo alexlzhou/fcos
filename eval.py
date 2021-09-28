@@ -130,7 +130,7 @@ if __name__ == "__main__":
     # from demo import convertSyncBNtoBN
     from dataset_voc import VOCDataset
 
-    eval_dataset = VOCDataset("D:/projects_python/_datasets/VOCdevkit_2007/VOC2007", resize_size=[512, 800], split='trainval')
+    eval_dataset = VOCDataset("D:/projects_python/_datasets/VOCdevkit_2012/VOC2012", resize_size=[512, 800], split='trainval')
     print("eval dataset has %d imgs" % len(eval_dataset))
     eval_loader = torch.utils.data.DataLoader(eval_dataset, batch_size=1, shuffle=False,
                                               collate_fn=eval_dataset.collate_fn)
