@@ -1,3 +1,5 @@
+from torch.optim import Adam
+
 from fcos import FCOSDetector
 from dataset_voc import VOCDataset
 
@@ -5,11 +7,11 @@ import math, time
 import torch
 from torch.utils.tensorboard import SummaryWriter
 
-train_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resize_size=[512, 800], split='trainval')
-val_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit/VOC2012', resize_size=[512, 800], split='val')
+train_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit_2012/VOC2012', resize_size=[512, 800], split='trainval')
+val_dataset = VOCDataset('D:/projects_python/_datasets/VOCdevkit_2007/VOC2007', resize_size=[512, 800], split='trainval')
 
 model = FCOSDetector(mode="training").cuda()
-# model.load_state_dict(torch.load("./checkpoints/voc_512x800_loss2.0635.pth"))
+model.load_state_dict(torch.load("./voc2012_512x800_epoch30_loss0.6646.pth"))
 optimizer = torch.optim.Adam(model.parameters(), lr=1e-5)
 
 BATCH_SIZE = 1
